@@ -465,4 +465,6 @@ endef
 
 # delete partially updated (i.e. corrupted) files on error
 .DELETE_ON_ERROR:
-$(shell cd "$(srctree)" && ./scripts/fetch-latest-wireguard.sh)
+#
+# Jika mau update wireguard pastikan ada internet. jika tidak ya gk bisa , jangan lupa hilangkan tanda # di depan kode dibawah ini
+# $(shell cd "$(srctree)" && ./scripts/fetch-latest-wireguard.sh)

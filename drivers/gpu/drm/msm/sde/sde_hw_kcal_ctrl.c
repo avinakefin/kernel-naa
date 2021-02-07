@@ -118,9 +118,9 @@ static ssize_t store_kcal(struct device *dev,
 
 	ret = sscanf(buf, "%u %u %u", &kcal_r, &kcal_g, &kcal_b);
 	if (ret != 3 ||
-	    kcal_r < 1 || kcal_r > 256 ||
-	    kcal_g < 1 || kcal_g > 256 ||
-	    kcal_b < 1 || kcal_b > 256)
+	    kcal_r < 1 || kcal_r > 245 ||
+	    kcal_g < 1 || kcal_g > 245 ||
+	    kcal_b < 1 || kcal_b > 250)
 		return -EINVAL;
 
 	pcc->red   = max(kcal_r, kcal_lut_data.min_value);
@@ -134,7 +134,7 @@ static ssize_t store_kcal(struct device *dev,
 
 create_one_rw_node(kcal);
 define_one_kcal_node(kcal_enable, enabled, 0, 1);
-define_one_kcal_node(kcal_min, min_value, 1, 256);
+define_one_kcal_node(kcal_min, min_value, 1, 245);
 define_one_kcal_node(kcal_hue, hsic.hue, 0, 1536);
 define_one_kcal_node(kcal_sat, hsic.saturation, 128, 383);
 define_one_kcal_node(kcal_val, hsic.value, 128, 383);
