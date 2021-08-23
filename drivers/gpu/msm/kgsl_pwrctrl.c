@@ -22,6 +22,7 @@
 #include <linux/msm_adreno_devfreq.h>
 #include <linux/of_device.h>
 #include <linux/thermal.h>
+#include <linux/battery_saver.h>
 
 #include "kgsl.h"
 #include "kgsl_pwrscale.h"
@@ -717,7 +718,10 @@ static void kgsl_pwrctrl_min_pwrlevel_set(struct kgsl_device *device,
 	if (level < pwr->max_pwrlevel)
 		level = pwr->max_pwrlevel;
 
-	pwr->min_pwrlevel = level;
+	if (is_battery_saver_on())
+		level = pwr->num_pwrlevels - 1;
+
+   pwr->min_pwrlevel = level;
 
 	/* Update the current level using the new limit */
 	kgsl_pwrctrl_pwrlevel_change(device, pwr->active_pwrlevel);
