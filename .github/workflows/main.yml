@@ -18,7 +18,7 @@ jobs:
         path: zipper
 
     - name: Android kernel build
-      uses: avinakefin/kernel-build@master
+      uses: avinakefin/build-kernel@master
       id: build
       env:
         NAME: Samsoe
