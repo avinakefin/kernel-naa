@@ -475,9 +475,33 @@ int schedtune_cpu_boost(int cpu)
 	return bg->boost_max;
 }
 
-int schedtune_task_boost(struct task_struct *p)
+static inline int schedtune_adj_ta(struct task_struct *p)
 {
 	struct schedtune *st;
+	char name_buf[NAME_MAX + 1];
+	int adj = p->signal->oom_score_adj;
+
+	/* We only care about adj == 0 */
+	if (adj != 0)
+		return 0;
+
+	/* Don't touch kthreads */
+	if (p->flags & PF_KTHREAD)
+		return 0;
+
+	st = task_schedtune(p);
+	cgroup_name(st->css.cgroup, name_buf, sizeof(name_buf));
+	if (!strncmp(name_buf, "top-app", strlen("top-app"))) {
+		pr_debug("top app is %s with adj %i\n", p->comm, adj);
+		return 1;
+	}
+
+	return 0;
+}
+
+int schedtune_task_boost(struct task_struct *p)
+
+{
 	int task_boost;
 
 	if (unlikely(!schedtune_initialized))
@@ -485,8 +509,7 @@ int schedtune_task_boost(struct task_struct *p)
 
 	/* Get task boost value */
 	rcu_read_lock();
-	st = task_schedtune(p);
-	task_boost = st->boost;
+	task_boost = schedtune_adj_ta(p);
 	rcu_read_unlock();
 
 	return task_boost;
@@ -497,15 +520,15 @@ int schedtune_task_boost(struct task_struct *p)
  */
 int schedtune_task_boost_rcu_locked(struct task_struct *p)
 {
-	struct schedtune *st;
 	int task_boost;
 
 	if (unlikely(!schedtune_initialized))
 		return 0;
 
 	/* Get task boost value */
-	st = task_schedtune(p);
-	task_boost = st->boost;
+	rcu_read_lock();
+	
+	task_boost = schedtune_adj_ta(p);
 
 	return task_boost;
 }
@@ -755,9 +778,9 @@ static void write_default_values(struct cgroup_subsys_state *css)
 	static struct st_data st_targets[] = {
 		{ "audio-app",	0, 0, 0, 0 },
 		{ "background",	0, 0, 0, 0 },
-		{ "foreground",	5, 1, 0, 1 },
+		{ "foreground",	1, 0, 0, 1 },
 		{ "rt",		0, 0, 0, 0 },
-		{ "top-app",	10, 1, 0, 1 },
+		{ "top-app",	0, 0, 0, 1 },
 	};
 	int i;
 
