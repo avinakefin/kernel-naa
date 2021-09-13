@@ -528,7 +528,7 @@ pref_address:		.quad LOAD_PHYSICAL_ADDR	# preferred load addr
 #
 # extra_bytes = (uncompressed_size >> 8) + 65536
 
-#define ZO_z_extra_bytes	((ZO_z_output_len >> 8) + 65536)
+#define ZO_z_extra_bytes	((ZO_z_output_len >> 8) + 131072)
 #if ZO_z_output_len > ZO_z_input_len
 # define ZO_z_extract_offset	(ZO_z_output_len + ZO_z_extra_bytes - \
 				 ZO_z_input_len)
